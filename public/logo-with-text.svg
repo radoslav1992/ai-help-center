@@ -1,0 +1,27 @@
+<svg width="400" height="200" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Robot head -->
+  <circle cx="100" cy="80" r="60" fill="#4CAF50" />
+  
+  <!-- Antenna -->
+  <rect x="95" y="10" width="10" height="20" fill="#4CAF50" />
+  <circle cx="100" cy="10" r="10" fill="#4CAF50" />
+  
+  <!-- Eyes -->
+  <circle cx="75" cy="80" r="12" fill="#1A2E35" />
+  <circle cx="125" cy="80" r="12" fill="#1A2E35" />
+  
+  <!-- Light bulb bottom -->
+  <path d="M160 100H40V150C40 172.091 58.9086 190 80 190H120C141.091 190 160 172.091 160 150V100Z" fill="#FFC107" />
+  
+  <!-- Lightbulb base lines -->
+  <rect x="70" y="155" width="60" height="10" rx="5" fill="#2196F3" />
+  <rect x="70" y="175" width="60" height="10" rx="5" fill="#2196F3" />
+  
+  <!-- Bottom cap -->
+  <path d="M120 195H80C69.5066 195 61 186.493 61 176V176H139V176C139 186.493 130.493 195 120 195Z" fill="#F44336" />
+  
+  <!-- Text -->
+  <text x="200" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#4CAF50">AI</text>
+  <text x="200" y="130" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFC107">Help</text>
+  <text x="200" y="180" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#2196F3">Center</text>
+</svg> 
