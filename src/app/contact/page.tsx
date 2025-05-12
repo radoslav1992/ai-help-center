@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { LanguageProvider } from '@/context/LanguageContext';
+import { useEffect, useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import { FiMail, FiPhone, FiMapPin, FiSend } from 'react-icons/fi';
-import Image from 'next/image';
-import { submitContactForm, ContactSubmission } from '@/lib/supabase';
+import { LanguageProvider } from '@/context/LanguageContext';
+import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
+import ClientOnly from '@/components/ClientOnly';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const translations = {
   en: {
@@ -42,9 +40,9 @@ const translations = {
     sending: 'Sending...',
     contactInfo: 'Contact Information',
     location: 'Our Location',
-    locationValue: '43 bul. Gotse Delchev, Sofia, Bulgaria',
+    locationValue: '43 bul Gotse Delchev, Sofia 1680, Bulgaria',
     phoneTitle: 'Phone Number',
-    phoneValue: '(123) 456-7890',
+    phoneValue: '',
     emailTitle: 'Email Address',
     businessHours: 'Business Hours',
     monFri: 'Monday - Friday:',
@@ -93,9 +91,9 @@ const translations = {
     sending: 'Изпращане...',
     contactInfo: 'Информация за контакт',
     location: 'Нашето местоположение',
-    locationValue: '43 бул. Гоце Делчев, София, България',
+    locationValue: '43 бул. Гоце Делчев, София 1680, България',
     phoneTitle: 'Телефонен номер',
-    phoneValue: '(123) 456-7890',
+    phoneValue: '',
     emailTitle: 'Имейл адрес',
     businessHours: 'Работно време',
     monFri: 'Понеделник - Петък:',
@@ -114,27 +112,9 @@ const translations = {
   }
 };
 
-export default function ContactPage() {
+function ContactContent() {
   const [language, setLanguage] = useState<'en' | 'bg'>('en');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    industry: '',
-    message: '',
-    service: 'general',
-  });
-  const [formErrors, setFormErrors] = useState({
-    name: '',
-    email: '',
-    company: '',
-    industry: '',
-    message: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState('');
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     // Check if there's a language preference stored
@@ -157,123 +137,29 @@ export default function ContactPage() {
 
   const t = translations[language];
 
-  const validateForm = (): boolean => {
-    const errors = {
-      name: '',
-      email: '',
-      company: '',
-      industry: '',
-      message: '',
-    };
-    let isValid = true;
-
-    // Validate name
-    if (!formData.name.trim()) {
-      errors.name = t.requiredField;
-      isValid = false;
-    }
-
-    // Validate email
-    if (!formData.email.trim()) {
-      errors.email = t.requiredField;
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = t.invalidEmail;
-      isValid = false;
-    }
-
-    // Validate company
-    if (!formData.company.trim()) {
-      errors.company = t.requiredField;
-      isValid = false;
-    }
-
-    // Validate industry
-    if (!formData.industry) {
-      errors.industry = t.requiredField;
-      isValid = false;
-    }
-
-    // Validate message
-    if (!formData.message.trim()) {
-      errors.message = t.requiredField;
-      isValid = false;
-    }
-
-    setFormErrors(errors);
-    return isValid;
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    
-    // Clear the error for this field when the user types
-    if (formErrors[name as keyof typeof formErrors]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-    
-    setIsSubmitting(true);
-    setSubmitError('');
-    
-    try {
-      // Submit to Supabase
-      const submission: ContactSubmission = {
-        name: formData.name,
-        email: formData.email,
-        company: formData.company,
-        industry: formData.industry,
-        service: formData.service,
-        message: formData.message
-      };
+    setFormStatus('submitting');
 
-      const result = await submitContactForm(submission);
-      
-      if (result.success) {
-        setSubmitSuccess(true);
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          company: '',
-          industry: '',
-          message: '',
-          service: 'general',
-        });
-      } else {
-        throw new Error('Failed to submit contact form');
-      }
-    } catch (error) {
-      console.error('Contact form submission error:', error);
-      setSubmitError(t.errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Simulate form submission
+    setTimeout(() => {
+      setFormStatus('success');
+      // Reset form
+      const form = e.target as HTMLFormElement;
+      form.reset();
+    }, 1500);
   };
 
   return (
     <LanguageProvider>
       <main className="min-h-screen">
-        <Navbar />
-        
         {/* Contact Hero */}
-        <div className="pt-32 pb-20 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative pt-32 pb-20 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-40 left-10 w-32 h-32 rounded-full bg-blue-200/50 dark:bg-blue-900/20 blur-xl"></div>
+          <div className="absolute bottom-10 right-10 w-40 h-40 rounded-full bg-purple-200/50 dark:bg-purple-900/20 blur-xl"></div>
+          
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <motion.h1 
               className="text-4xl md:text-5xl font-bold mb-6"
               initial={{ opacity: 0, y: 20 }}
@@ -295,277 +181,202 @@ export default function ContactPage() {
           </div>
         </div>
         
-        {/* Contact Section */}
-        <section className="py-20">
+        {/* Contact Form and Info */}
+        <section className="py-16 bg-white dark:bg-gray-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Contact Form */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700"
               >
-                <h2 className="text-2xl md:text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+                <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
                   {t.sendMessage}
                 </h2>
                 
-                {submitSuccess ? (
-                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
-                    <h3 className="text-xl font-semibold text-green-800 dark:text-green-300 mb-2">
-                      {t.thankYou}
-                    </h3>
-                    <p className="text-green-700 dark:text-green-400">
-                      {t.receivedMessage}
-                    </p>
-                    <button
-                      onClick={() => setSubmitSuccess(false)}
-                      className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                    >
-                      {t.sendAnother}
-                    </button>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t.name}
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition-colors"
+                      placeholder={t.name}
+                    />
                   </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.name} <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          className={`w-full px-4 py-2 border ${formErrors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white`}
-                        />
-                        {formErrors.name && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
-                        )}
-                      </div>
-                      <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.email} <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          className={`w-full px-4 py-2 border ${formErrors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white`}
-                        />
-                        {formErrors.email && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.phone}
-                        </label>
-                        <input
-                          type="tel"
-                          id="phone"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.company} <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="company"
-                          name="company"
-                          value={formData.company}
-                          onChange={handleChange}
-                          className={`w-full px-4 py-2 border ${formErrors.company ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white`}
-                        />
-                        {formErrors.company && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.company}</p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label htmlFor="industry" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.industry} <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          id="industry"
-                          name="industry"
-                          value={formData.industry}
-                          onChange={handleChange}
-                          className={`w-full px-4 py-2 border ${formErrors.industry ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white`}
-                        >
-                          <option value="" disabled>{t.industryPlaceholder}</option>
-                          <option value="technology">{t.industries.technology}</option>
-                          <option value="finance">{t.industries.finance}</option>
-                          <option value="healthcare">{t.industries.healthcare}</option>
-                          <option value="education">{t.industries.education}</option>
-                          <option value="retail">{t.industries.retail}</option>
-                          <option value="manufacturing">{t.industries.manufacturing}</option>
-                          <option value="entertainment">{t.industries.entertainment}</option>
-                          <option value="other">{t.industries.other}</option>
-                        </select>
-                        {formErrors.industry && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.industry}</p>
-                        )}
-                      </div>
-                      <div>
-                        <label htmlFor="service" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {t.serviceInterested}
-                        </label>
-                        <select
-                          id="service"
-                          name="service"
-                          value={formData.service}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                        >
-                          <option value="general">{t.generalInquiry}</option>
-                          <option value="ai-solutions">{t.aiSolutions}</option>
-                          <option value="automation">{t.automation}</option>
-                          <option value="web-development">{t.webDev}</option>
-                          <option value="data-analytics">{t.dataAnalytics}</option>
-                          <option value="ai-chatbots">{t.aiChatbots}</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {t.message} <span className="text-red-500">*</span>
-                      </label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={5}
-                        className={`w-full px-4 py-2 border ${formErrors.message ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white`}
-                      ></textarea>
-                      {formErrors.message && (
-                        <p className="mt-1 text-sm text-red-500">{formErrors.message}</p>
-                      )}
-                    </div>
-                    
-                    {submitError && (
-                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-700 dark:text-red-400">
-                        {submitError}
-                      </div>
-                    )}
-                    
+                  
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t.email}
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition-colors"
+                      placeholder={t.email}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t.serviceInterested}
+                    </label>
+                    <input
+                      type="text"
+                      id="subject"
+                      name="subject"
+                      required
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition-colors"
+                      placeholder={t.generalInquiry}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t.message}
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={5}
+                      required
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition-colors resize-none"
+                      placeholder={t.message}
+                    ></textarea>
+                  </div>
+                  
+                  <div>
                     <button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-70"
+                      disabled={formStatus === 'submitting'}
+                      className={`w-full py-3 px-6 rounded-lg text-white font-medium 
+                        ${formStatus === 'submitting' ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'} 
+                        transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-lg`}
                     >
-                      {isSubmitting ? (
-                        <span className="flex items-center">
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          {t.sending}
-                        </span>
-                      ) : (
-                        <span className="flex items-center">
-                          <FiSend className="mr-2" />
-                          {t.send}
-                        </span>
-                      )}
+                      {formStatus === 'submitting' ? t.sending : t.send}
                     </button>
-                  </form>
-                )}
+                  </div>
+                  
+                  {formStatus === 'success' && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300 p-3 rounded-lg"
+                    >
+                      {t.thankYou}
+                    </motion.div>
+                  )}
+                  
+                  {formStatus === 'error' && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 p-3 rounded-lg"
+                    >
+                      {t.errorMessage}
+                    </motion.div>
+                  )}
+                </form>
               </motion.div>
               
               {/* Contact Information */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <h2 className="text-2xl md:text-3xl font-bold mb-8 text-gray-900 dark:text-white">
-                  {t.contactInfo}
-                </h2>
-                
-                <div className="space-y-8">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                      <FiMapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t.location}</h3>
-                      <p className="mt-1 text-gray-600 dark:text-gray-300">
-                        {t.locationValue}
-                      </p>
-                    </div>
-                  </div>
+                {/* Contact Info */}
+                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white mb-8">
+                  <h2 className="text-2xl font-bold mb-6 text-white">
+                    {t.contactInfo}
+                  </h2>
                   
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                      <FiPhone className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                        <FiMapPin className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-white">{t.location}</h4>
+                        <p className="text-white/90">
+                          <a 
+                            href="https://maps.google.com/?q=1234+Main+St,+Sofia,+Bulgaria" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            {t.locationValue}
+                          </a>
+                        </p>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t.phoneTitle}</h3>
-                      <p className="mt-1 text-gray-600 dark:text-gray-300">
-                        {t.phoneValue}
-                      </p>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                        <FiPhone className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-white">{t.phoneTitle}</h4>
+                        <p className="text-white/90">
+                          <a 
+                            href="tel:+359123456789" 
+                            className="hover:underline"
+                          >
+                            {t.phoneValue}
+                          </a>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                      <FiMail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t.emailTitle}</h3>
-                      <p className="mt-1 text-gray-600 dark:text-gray-300">
-                        <a href="mailto:info@aihelpcenter.com" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                          info@aihelpcenter.com
-                        </a>
-                      </p>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                        <FiMail className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-white">{t.emailTitle}</h4>
+                        <p className="text-white/90">
+                          <a 
+                            href="mailto:info@ai-help-center.com" 
+                            className="hover:underline"
+                          >
+                            info@ai-help-center.com
+                          </a>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="mt-12 bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                    {t.businessHours}
-                  </h3>
-                  <ul className="space-y-2 text-gray-600 dark:text-gray-300">
-                    <li className="flex justify-between">
-                      <span>{t.monFri}</span>
-                      <span>{t.monFriHours}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>{t.saturday}</span>
-                      <span>{t.saturdayHours}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>{t.sunday}</span>
-                      <span>{t.sundayValue}</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                {/* Company Logo */}
-                <div className="mt-12 flex justify-center">
-                  <div className="relative w-64 h-64">
-                    <Image 
-                      src="/logo-with-text.png"
-                      alt="AI Help Center Logo"
-                      fill
-                      className="object-contain"
-                    />
+                {/* Business Hours */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                      <FiClock className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.businessHours}</h3>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-700 dark:text-gray-300">{t.monFri}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{t.monFriHours}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-700 dark:text-gray-300">{t.saturday}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{t.saturdayHours}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-700 dark:text-gray-300">{t.sunday}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{t.sundayValue}</span>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -573,8 +384,43 @@ export default function ContactPage() {
           </div>
         </section>
         
-        <Footer />
+        {/* Map */}
+        <section className="py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                {t.location}
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                {t.locationValue}
+              </p>
+            </div>
+            
+            <div className="rounded-2xl overflow-hidden shadow-xl h-96">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2932.5354167011933!2d23.32233387672872!3d42.69718441669258!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40aa8682cb317bf5%3A0x400a01269bf5e60!2sSofia%20Center%2C%20Sofia%2C%20Bulgaria!5e0!3m2!1sen!2sus!4v1699305767368!5m2!1sen!2sus" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Location map"
+              ></iframe>
+            </div>
+          </div>
+        </section>
+        
+        <ScrollToTop />
       </main>
     </LanguageProvider>
+  );
+}
+
+export default function Contact() {
+  return (
+    <ClientOnly fallback={<div className="h-screen w-full flex items-center justify-center">Loading...</div>}>
+      <ContactContent />
+    </ClientOnly>
   );
 } 

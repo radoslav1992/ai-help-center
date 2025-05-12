@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import ScrollToTop from '@/components/ScrollToTop';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
-import { FiAward, FiUsers, FiCheck, FiTrendingUp } from 'react-icons/fi';
+import { FiUsers, FiTarget, FiAward, FiTrendingUp, FiCode, FiCpu, FiShield, FiHeart, FiCheck } from 'react-icons/fi';
+import ClientOnly from '@/components/ClientOnly';
 import Image from 'next/image';
 
 const translations = {
@@ -106,8 +106,6 @@ export default function AboutPage() {
   return (
     <LanguageProvider>
       <main className="min-h-screen">
-        <Navbar />
-        
         {/* About Hero */}
         <div className="pt-32 pb-20 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -345,7 +343,7 @@ export default function AboutPage() {
           </div>
         </section>
         
-        <Footer />
+        <ScrollToTop />
       </main>
     </LanguageProvider>
   );

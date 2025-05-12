@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import ScrollToTop from '@/components/ScrollToTop';
 import Services from '@/components/Services';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { FiCpu, FiZap, FiGlobe, FiBarChart2, FiMessageCircle, FiShield } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import ClientOnly from '@/components/ClientOnly';
 
 const translations = {
   en: {
@@ -93,9 +93,12 @@ export default function ServicesPage() {
 
   return (
     <LanguageProvider>
-      <main className="min-h-screen">
-        <Navbar />
-        
+      <motion.main 
+        className="min-h-screen page-transition"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         {/* Services Hero */}
         <div className="pt-32 pb-20 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -270,8 +273,8 @@ export default function ServicesPage() {
           </div>
         </section>
         
-        <Footer />
-      </main>
+        <ScrollToTop />
+      </motion.main>
     </LanguageProvider>
   );
 } 
