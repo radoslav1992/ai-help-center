@@ -6,9 +6,9 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
 import ClientOnly from '@/components/ClientOnly';
 import { getPortfolioProjects, PortfolioProject } from '@/lib/supabase';
-import Image from 'next/image';
 import Link from 'next/link';
 import { FiExternalLink, FiFilter } from 'react-icons/fi';
+import StaticImage from '@/components/StaticImage';
 
 const translations = {
   en: {
@@ -188,11 +188,12 @@ export default function PortfolioPage() {
                     viewport={{ once: true }}
                   >
                     <div className="relative h-48 w-full">
-                      <Image
+                      <StaticImage
                         src={project.image_url}
                         alt={language === 'en' ? project.title : project.title_bg}
-                        fill
                         className="object-cover"
+                        width={400}
+                        height={200}
                       />
                     </div>
                     <div className="p-6">

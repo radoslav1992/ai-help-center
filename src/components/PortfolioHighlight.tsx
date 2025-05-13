@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import { FiArrowRight } from 'react-icons/fi';
 import { getFeaturedProjects, PortfolioProject } from '@/lib/supabase';
+import StaticImage from './StaticImage';
 
 const translations = {
   en: {
@@ -125,11 +125,12 @@ const PortfolioHighlight = () => {
                 viewport={{ once: true }}
               >
                 <div className="relative h-48 w-full">
-                  <Image
+                  <StaticImage
                     src={project.image_url}
                     alt={language === 'en' ? project.title : project.title_bg}
-                    fill
                     className="object-cover"
+                    width={400}
+                    height={200}
                   />
                 </div>
                 <div className="p-6">

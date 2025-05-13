@@ -12,6 +12,15 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'qexptgmfgdcehirzfflo.supabase.co',
+        pathname: '**',
+      },
+    ],
+  },
 }
 
 module.exports = nextConfig 

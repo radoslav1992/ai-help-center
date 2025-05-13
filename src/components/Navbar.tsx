@@ -10,6 +10,7 @@ const translations = {
   en: {
     home: 'Home',
     services: 'Services',
+    portfolio: 'Portfolio',
     about: 'About',
     contact: 'Contact',
     getStarted: 'Get Started',
@@ -17,6 +18,7 @@ const translations = {
   bg: {
     home: 'Начало',
     services: 'Услуги',
+    portfolio: 'Портфолио',
     about: 'За нас',
     contact: 'Контакти',
     getStarted: 'Започнете',
@@ -41,6 +43,14 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    // Check if there's a language preference stored
+    const storedLanguage = localStorage.getItem('language') as 'en' | 'bg' | null;
+    if (storedLanguage && (storedLanguage === 'en' || storedLanguage === 'bg')) {
+      setLanguage(storedLanguage);
+    }
+  }, []);
+
   const toggleLanguage = () => {
     const newLanguage = language === 'en' ? 'bg' : 'en';
     setLanguage(newLanguage);
@@ -56,6 +66,7 @@ const Navbar = () => {
   const navLinks = [
     { name: t.home, href: '/' },
     { name: t.services, href: '/services' },
+    { name: t.portfolio, href: '/portfolio' },
     { name: t.about, href: '/about' },
     { name: t.contact, href: '/contact' },
   ];
